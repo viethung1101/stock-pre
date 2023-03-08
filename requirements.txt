@@ -1,7 +1,6 @@
-yfinance
-pandas
-numpy 
-math 
-sklearn
-matplotlib
-tensorflow.keras
+yfinance==0.2.12
+pandas==1.5.3
+numpy==1.21.5
+scikit-learn==1.0.2
+matplotlib==3.5.2
+tensorflow=2.11.0
