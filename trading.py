@@ -22,7 +22,7 @@ plt.plot(df['Close'])
 plt.xlabel('Date', fontsize=18)
 plt.ylabel('Close_Price', fontsize=18)
 # plt.show()
-plt.savefig('Historical.png', bbox_inches='tight')
+plt.savefig('historical.png', bbox_inches='tight')
 
 data = df.filter(['Close'])
 df = np.array(data).reshape(-1,1)
@@ -82,7 +82,7 @@ plt.plot(train['Close'])
 plt.plot(val[['Close','predictions']],)
 plt.legend(['train', 'val', 'predictions'], loc = 'lower right')
 # plt.show()
-plt.savefig('prediction with historical.png', bbox_inches='tight')
+plt.savefig('prediction-with-historical.png', bbox_inches='tight')
 
 test = df[training_data_len:]
 plt.figure(figsize=(16,8))
