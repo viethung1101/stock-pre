@@ -1,0 +1,35 @@
+{
+  "containerDefinitions": [
+    {
+      "name": "ProxyContainer",
+      "image": "REPOSITORY_URI:latest",
+      "portMappings": [
+        {
+          "containerPort": 8000,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true,
+      "dockerLabels": {
+        "name": "CONTAINER_NAME"
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/SERVICE_NAME-ENV-loggroup-SERVICE_NAME",
+          "awslogs-region": "AWS_REGION",
+          "awslogs-stream-prefix": "proxy"
+        }
+      }
+    }
+  ],
+  "taskRoleArn": "TASK_EXECUTION_ARN",
+  "executionRoleArn": "TASK_EXECUTION_ARN",
+  "family": "PROJECT_NAME-ENV-family-name-SERVICE_NAME",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": [
+    "FARGATE"
+  ],
+  "cpu": "256",
+  "memory": "1024"
+}
