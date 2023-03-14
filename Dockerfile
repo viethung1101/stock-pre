@@ -1,12 +1,14 @@
-# Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
-# SPDX-License-Identifier: MIT-0
-
+# Pull the minimal Ubuntu image
 FROM ubuntu
 
+# Install Nginx
 RUN apt-get -y update && apt-get -y install nginx
 
-COPY nginx.conf /etc/nginx/nginx.conf 
+# Copy the Nginx config
+COPY nginx.conf /etc/nginx/sites-available/default
 COPY index.html /usr/share/nginx/html
-EXPOSE 8000/tcp
+# Expose the port for access
+EXPOSE 80/tcp
 
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+# Run the Nginx server
+CMD ["/usr/sbin/nginx", "-g", "daemon off;"]
