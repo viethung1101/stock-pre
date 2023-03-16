@@ -7,9 +7,9 @@ RUN apt-get -y update && apt-get -y install nginx
 # Copy the Nginx config
 COPY nginx.conf /etc/nginx/sites-available/default
 COPY index.html /usr/share/nginx/html
-COPY historical.png /user/share/nginx//html/historical.png 
-COPY prediction-with-historical.png /user/share/nginx/html/prediction-with-historical.png
-COPY prediction.png /user/share/nginx/html/prediction.png
+COPY historical.png /user/share/nginx//html
+COPY prediction-with-historical.png /user/share/nginx/html
+COPY prediction.png /user/share/nginx/html
 # Expose the port for access
 EXPOSE 80/tcp
 
