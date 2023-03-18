@@ -113,18 +113,19 @@ plt.text(date[-1],real_data[-1],real_data[-1])
 # plt.show()
 plt.savefig('test.png', bbox_inches='tight')
 
-
 #PLOT PREDICT
+
+predict = scaler.inverse_transform(predict)
 date_predict = date[-1]
 for i in range(n-1):
     date_predict=np.append(date_predict,date_predict[-1]+1).reshape(-1,1)
-predict = scaler.inverse_transform(predict)
 plt.figure(figsize=(16, 8))
 plt.title('PREDICT')
 plt.xlabel('Date', fontsize=18)
 plt.ylabel('Close_Price', fontsize=18)
-plt.plot(date_predict,df[-n:])
 plt.plot(date_predict,predict[-n:])
-plt.legend(['data', 'prediction'], loc = 'lower right')
+for i in range(date_predict.shape[0]):
+    plt.text(date_predict[i],predict[n+i],predict[n+i],fontsize=7)
 # plt.show()
 plt.savefig('predict.png', bbox_inches='tight')
+
