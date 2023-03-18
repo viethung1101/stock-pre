@@ -1,5 +1,6 @@
 import yfinance as yf
 import pandas as pd
+
 import numpy as np
 import math 
 from sklearn.preprocessing import MinMaxScaler
@@ -9,20 +10,14 @@ from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import LSTM
 
 df = yf.download('TSLA')
-# Historical Data Visualization
-plt.figure(figsize=(16,8))
-plt.title('historical price')
-plt.plot(df['Close'])
-plt.xlabel('Date', fontsize=18)
-plt.ylabel('Close_Price', fontsize=18)
-# plt.show()
-
 # DATA
 data = df.filter(['Close']) #Drop all except 'Close' column
 data.index
 #Get date time column to plot
 date = data.index
-date=np.array([date],dtype='datetime64[ns]').reshape(-1,1)
+date=np.array([date],dtype=np.datetime64).reshape(-1,1)
+date = date.astype('datetime64[D]')
+
 
 #Drop date column, norm to nparray
 df = np.array(data).reshape(-1,1)
@@ -37,17 +32,16 @@ training_data_len = math.ceil(len(scaled_df)*1)
 #cut off train data 
 train_data = scaled_df[0:training_data_len,:]
 x_train = []
-y_train = []
+y_train = []    
 for i in range(60, len(train_data)):
     x_train.append(train_data[i-60:i, 0])
-    #x_train included 2501 sub array, each has 60 elements  
+    #y_train value not in corresponding_index of x_train  
     y_train.append(train_data[i, 0])
     if i<= 60:
         print(x_train)
         print(y_train)
         print()
 x_train, y_train = np.array(x_train), np.array(y_train)
-
 #reshape x_train to only 1 column
 x_train = np.reshape(x_train, (x_train.shape[0], x_train.shape[1], 1))
 
@@ -58,50 +52,70 @@ model.add(LSTM(50,return_sequences = False))
 model.add(Dense(25))
 model.add(Dense(1))
 model.compile(optimizer = 'adam', loss = 'mean_squared_error')
+#testing to find best epoch and batch_size
 model.fit(x_train, y_train, batch_size=40, epochs=20)
-# TEST
-
-test_data = scaled_df[training_data_len  - 60: , :]
+# Testing & Evaluation
 x_test = []
 y_test = df[training_data_len-60: , :] #60 last data
 for i in range(len(scaled_df)-60,len(scaled_df)): #commit: change (len)test_data to len(scaled_df)
     x_test.append(scaled_df[i-60:i, 0])
-    
-x_test = np.array(x_test)
-x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
-predictions = model.predict(x_test)
-predictions = scaler.inverse_transform(predictions)
-rmse = np.sqrt(np.mean(predictions-y_test)**2)
-print("ROOT MEAN SQUARE ERROR: ",rmse)
+x_test, y_test = np.array(x_test), np.array(y_test)
 
-# Visualization of Trainning result
+#y_test still not in x_test with corresponding_index
+x_test = np.reshape(x_test, (x_test.shape[0], x_test.shape[1], 1))
+print(scaler.inverse_transform(x_test[-1]))
+print(y_test[-1])
+test = model.predict(x_test)
+test = scaler.inverse_transform(test)
+rmse = np.sqrt(np.mean(test-y_test)**2) 
+
+# Prediction
+new_df = scaled_df.copy()
+n = 30 #day predicting
+x_predict = x_test.copy()
+for i in range(n):
+    predict = model.predict(x_predict)
+    np.append(new_df, predict[-1])
+    for i in range(len(new_df)-60, len(new_df)):
+        np.append(x_predict, new_df[i-60:, 0])
+# Visualization of Testing & Predicting
 train = data[:training_data_len]
 val = data[training_data_len-60:]
-val['predictions'] = predictions
+val['test'] = test
 plt.figure(figsize=(16, 8))
 plt.title('Trainning')
 plt.xlabel('Date', fontsize=18)
 plt.ylabel('Close_Price', fontsize=18)
 plt.plot(train['Close'])
-plt.plot(val[['Close','predictions']])
-plt.legend(['train', 'val', 'predictions'], loc = 'lower right')
+plt.plot(val[['Close','test']])
+plt.legend(['train', 'val', 'test'], loc = 'lower right')
 plt.text(16000,200,'Root Mean Square Error: %s'%rmse.astype(str))
+plt.savefig('training.png', bbox_inches='tight')
 # plt.show()
-plt.savefig('prediction-with-historical.png', bbox_inches='tight')
-
-print("Du doan den ngay ",date[-1])
-
-# Visualization of Prediction
 day_show = 8 #So ngay muon show
-test = df[training_data_len-day_show:]
+real_data = df[training_data_len-day_show:]
 plt.figure(figsize=(16,8))
-plt.title('historical price')
-plt.plot(date[training_data_len-day_show:],test)
-plt.plot(date[training_data_len-day_show:],predictions[-day_show:])
+plt.title('Testing')
+plt.plot(date[training_data_len-day_show:],real_data)
+plt.plot(date[training_data_len-day_show:],test[-day_show:])
 plt.xlabel('Days', fontsize=18)
 plt.ylabel('Close_Price', fontsize=18)
-plt.legend(['test', 'predictions'], loc = 'lower right')
-plt.text(date[-1],predictions[-1],predictions[-1])
+plt.legend(['real_data', 'test'], loc = 'lower right')
 plt.text(date[-1],test[-1],test[-1])
+plt.text(date[-1],real_data[-1],real_data[-1])
+# plt.show()
+plt.savefig('testing.png', bbox_inches='tight')
+data['Close'][-60:]
+date_predict = date[-1]
+for i in range(n-1):
+    date_predict=np.append(date_predict,date_predict[-1]+1).reshape(-1,1)
+predict = scaler.inverse_transform(predict)
+plt.figure(figsize=(16, 8))
+plt.title('Prediction')
+plt.xlabel('Date', fontsize=18)
+plt.ylabel('Close_Price', fontsize=18)
+plt.plot(date_predict,df[-n:])
+plt.plot(date_predict,predict[-n:])
+plt.legend(['data', 'prediction'], loc = 'lower right')
 # plt.show()
 plt.savefig('prediction.png', bbox_inches='tight')
