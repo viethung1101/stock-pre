@@ -8,8 +8,24 @@ import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import LSTM
+import sys
+import os
 
-df = yf.download('TSLA')
+
+corp_name = str(sys.argv[1]).strip()
+corp = yf.Ticker(corp_name)
+try:
+	corp_check = corp.history()
+	if corp_check.empty:
+		raise Exception
+	else: 
+		df_cop = yf.download(corp_name)
+except:
+    print("Unidentify ticker named:",corp_name)
+    print("Get more information about Ticker at: https://www.google.com/search?q=what+is+stock+ticker")
+    sys.exit(1)
+df = df_cop.copy()
+
 # DATA
 data = df.filter(['Close']) #Drop all except 'Close' column
 data.index
@@ -21,6 +37,7 @@ date = date.astype('datetime64[D]')
 
 df = np.array(data).reshape(-1,1) #Drop date column, norm to nparray
 
+>>>>>>> eb57aca (update sys)
 #normalize data to 0->1
 scaler = MinMaxScaler(feature_range=(0,1))
 scaled_df = scaler.fit_transform(np.array(df).reshape(-1,1))
@@ -101,7 +118,10 @@ plt.savefig('train.png', bbox_inches='tight')
 day_show = 15 #So ngay muon show
 
 real_data = df[training_data_len-day_show:]
+
+plt.style.use('ggplot')
 plt.figure(figsize=(16,8))
+
 plt.title('TEST')
 plt.plot(date[training_data_len-day_show:],real_data)
 plt.plot(date[training_data_len-day_show:],test[-day_show:])
@@ -113,19 +133,25 @@ plt.text(date[-1],real_data[-1],real_data[-1])
 # plt.show()
 plt.savefig('test.png', bbox_inches='tight')
 
+<<<<<<< HEAD
 #PLOT PREDICT
 
-predict = scaler.inverse_transform(predict)
+
+#PLOT PREDICT
 date_predict = date[-1]
 for i in range(n-1):
     date_predict=np.append(date_predict,date_predict[-1]+1).reshape(-1,1)
+predict = scaler.inverse_transform(predict)
+plt.style.use('ggplot')
+
 plt.figure(figsize=(16, 8))
 plt.title('PREDICT')
 plt.xlabel('Date', fontsize=18)
 plt.ylabel('Close_Price', fontsize=18)
 plt.plot(date_predict,predict[-n:])
-for i in range(date_predict.shape[0]):
-    plt.text(date_predict[i],predict[n+i],predict[n+i],fontsize=7)
+
+plt.legend(['data', 'prediction'], loc = 'lower right')
+plt.text(date_predict[-1],predict[-1],predict[-1])
 # plt.show()
 plt.savefig('predict.png', bbox_inches='tight')
 
