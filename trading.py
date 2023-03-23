@@ -1,16 +1,16 @@
 import yfinance as yf
 import pandas as pd
-
 import numpy as np
 import math 
+
 from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.layers import LSTM
 import sys
-import os
 
+#=======================================================
 
 corp_name = str(sys.argv[1]).strip()
 corp = yf.Ticker(corp_name)
@@ -70,8 +70,6 @@ model.compile(optimizer = 'adam', loss = 'mean_squared_error')
 
 model.fit(x_train, y_train, batch_size=40, epochs=20) #testing to find best epoch and batch_size
 
-
-
 # Testing & Evaluation
 x_test = []
 y_test = df[training_data_len-60: , :] #60 last data
@@ -96,7 +94,6 @@ for i in range(n):
     for i in range(len(new_df)-60, len(new_df)):
         np.append(x_predict, new_df[i-60:, 0])
 
-
 # Visualization of Testing & Predicting
 #PLOT TRAIN
 train = data[:training_data_len]
@@ -113,10 +110,8 @@ plt.text(16000,200,'Root Mean Square Error: %s'%rmse.astype(str))
 plt.savefig('train.png', bbox_inches='tight')
 # plt.show()
 
-
 #PLOT TEST
 day_show = 15 #So ngay muon show
-
 real_data = df[training_data_len-day_show:]
 
 plt.style.use('ggplot')
@@ -131,11 +126,7 @@ plt.legend(['real_data', 'test'], loc = 'lower right')
 plt.text(date[-1],test[-1],test[-1])
 plt.text(date[-1],real_data[-1],real_data[-1])
 # plt.show()
-plt.savefig('test.png', bbox_inches='tight')
-
-<<<<<<< HEAD
-#PLOT PREDICT
-
+plt.savefig('test.png', bbox_inches='tight'
 
 #PLOT PREDICT
 date_predict = date[-1]
